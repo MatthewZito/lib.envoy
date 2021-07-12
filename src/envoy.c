@@ -1,6 +1,30 @@
 #include "envoy.h"
 
-#include <memory.h> /* for memcpy */
+#include <stdlib.h> /* for calloc */
+#include <memory.h> /* for memcpy, strncpy */
+
+// TODO update to macro
+node_t* glue_to_chain(glthread_t* glthreadptr) {
+	return (node_t*)((char*)(glthreadptr) - (char *)&(((node_t*)0)->glthread));
+}
+
+/**
+ * @brief Allocate and initialize a new Envoy with a given name
+ *
+ * @param envoy_name
+ * @return envoy_t*
+ */
+envoy_t* envoy_init(char* envoy_name) {
+	envoy_t* envoy;
+
+	if ((envoy = calloc(1, sizeof(envoy_t)))) {
+		strncpy(envoy->chain_name, envoy_name, sizeof(envoy_name));
+	} // TODO panic here
+
+	glthread_init(&envoy->chain_head);
+
+	return envoy;
+}
 
 /**
  * @brief Register a new node as a subscriber to a given Envoy
@@ -8,7 +32,7 @@
  * @param envoy
  * @param node
  */
-void subscribe_to_envoy(envoy_t* envoy, node_t* node) {
+void envoy_subscribe(envoy_t* envoy, node_t* node) {
 	node_t* new_node = calloc(1, sizeof(node_t));
 
 	memcpy(new_node, node, sizeof(node_t));
@@ -25,12 +49,13 @@ void subscribe_to_envoy(envoy_t* envoy, node_t* node) {
  * @param key
  * @param key_size
  */
-void invoke_envoy(
+void envoy_invoke(
 	envoy_t* envoy,
 	void* arg,
 	size_t arg_size,
 	char* key,
-	size_t key_size) {
+	size_t key_size,
+	envoy_event_t op_code) {
 
 	glthread_t* curr;
 	node_t* node;
@@ -48,16 +73,12 @@ void invoke_envoy(
 		if (key && key_size && node->key_set && (key_size == node->key_size)) {
 			// only invoke if the key matches
 			if (memcmp(key, node->key, key_size) == 0) {
-				node->event_fn(arg, arg_size);
+				node->event_fn(arg, arg_size, op_code, node->subscriber_id);
 			}
 		} else {
 			// the node subscribes to all keys (no key specified)
-			node->event_fn(arg, arg_size);
+			node->event_fn(arg, arg_size, op_code, node->subscriber_id);
 		}
 
 	} ITERATE_GLTHREAD_END(&envoy->chain_head, curr);
-}
-
-node_t* glue_to_chain(glthread_t* glthreadptr) {
-	return (node_t*)((char*)(glthreadptr) - (char *)&(((node_t*)0)->glthread));
 }

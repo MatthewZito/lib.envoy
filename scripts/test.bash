@@ -5,7 +5,9 @@ TESTING_DIR=t
 UTIL_F=util.bash
 REPO_DIR=envoy
 
-declare -a SKIP_FILES=()
+declare -a SKIP_FILES=(
+	'test_util.h'
+)
 
 not_test_file () {
 	local test=$1
@@ -31,10 +33,15 @@ run_test () {
 	./main
 }
 
-main () {
-	tests=()
+echoit () {
+	echo "HERE $1"
+}
 
+main () {
 	make unix
+
+	declare -a tests=($(ls $TESTING_DIR | filter not_test_file))
+
 	for_each run_test ${tests[*]}
 }
 

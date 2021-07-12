@@ -19,7 +19,7 @@ typedef enum {
 /**
  * @brief Subscriber callback type
  */
-typedef void (*envoy_emitter)(void*, size_t);
+typedef void (*envoy_emitter)(void *, size_t, envoy_event_t, uint32_t);
 
 /**
  * @brief A notifier chain instance
@@ -37,7 +37,10 @@ typedef struct notifier_chain_node {
 	size_t key_size; /* Size of the key subscribed to, where applicable */
 	int key_set; /* Bitmask indicating whether the subscriber has subscribed to a specific key */
 	envoy_emitter event_fn; /* Event function to invoke when subscription key type events are emitted */
-	glthread_t glthread; /* TODO */
+	glthread_t glthread; /* The GL Thread node whose offset stores this node */
+	uint32_t subscriber_id; /* Node unique id */
 } node_t;
+
+envoy_t* envoy_init(char* envoy_name);
 
 #endif /* ENVOY_H */

@@ -1,7 +1,10 @@
 /**
- * @file gl_thread.c
+ * @file gl_thread.c (lib.cartilage)
  * @author Matthew Zito (goldmund@freenode)
- * @brief Implements a GLUE Doubly Linked List
+ *
+ * @brief Implements a GLUE Doubly Linked List - Ported from lib.cartilage
+ * Tested in and ported from lib.cartilage (https://github.com/MatthewZito/lib.cartilage)
+ *
  * @version 0.1
  * @date 2021-07-11
  *

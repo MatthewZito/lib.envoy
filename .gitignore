@@ -1,2 +1,4 @@
 envoy
+*.so
+*.o
 .vscode
