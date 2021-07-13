@@ -17,4 +17,4 @@ win:
 	$(CC) $(CFLAGS) $(OBJFILES) $(LDFLAGS) $(WIN_BIN)
 
 clean:
-	rm $(TARGET)
+	rm $(TARGET) $(TARGET).so main main.o

@@ -4,8 +4,8 @@
 #include <memory.h> /* for memcpy, strncpy */
 
 // TODO update to macro
-node_t* glue_to_chain(glthread_t* glthreadptr) {
-	return (node_t*)((char*)(glthreadptr) - (char *)&(((node_t*)0)->glthread));
+envoy_node_t* glue_to_chain(glthread_t* glthreadptr) {
+	return (envoy_node_t*)((char*)(glthreadptr) - (char *)&(((envoy_node_t*)0)->glthread));
 }
 
 /**
@@ -32,10 +32,10 @@ envoy_t* envoy_init(char* envoy_name) {
  * @param envoy
  * @param node
  */
-void envoy_subscribe(envoy_t* envoy, node_t* node) {
-	node_t* new_node = calloc(1, sizeof(node_t));
+void envoy_subscribe(envoy_t* envoy, envoy_node_t* node) {
+	envoy_node_t* new_node = calloc(1, sizeof(envoy_node_t));
 
-	memcpy(new_node, node, sizeof(node_t));
+	memcpy(new_node, node, sizeof(envoy_node_t));
 	glthread_init(&new_node->glthread);
 	glthread_insert_after(&envoy->chain_head, &new_node->glthread);
 }
@@ -58,7 +58,7 @@ void envoy_invoke(
 	envoy_event_t op_code) {
 
 	glthread_t* curr;
-	node_t* node;
+	envoy_node_t* node;
 
 	if (IS_GLTHREAD_EMPTY(&envoy->chain_head)) return;
 

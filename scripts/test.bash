@@ -33,10 +33,6 @@ run_test () {
 	./main
 }
 
-echoit () {
-	echo "HERE $1"
-}
-
 main () {
 	make unix
 

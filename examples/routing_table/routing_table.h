@@ -1,6 +1,8 @@
 #ifndef ROUTING_TABLE_H
 #define ROUTING_TABLE_H
 
+#include "envoy.h"
+
 #include <stdbool.h>
 
 /*
@@ -37,6 +39,7 @@ typedef struct routing_table_entry {
 	char oif[32];
 	struct routing_table_entry* prev;
 	struct routing_table_entry* next;
+	envoy_t* envoy;
 } rt_entry_t;
 
 typedef struct routing_table {
@@ -47,16 +50,28 @@ typedef struct routing_table {
 
 void rt_init(rt_table_t* table);
 
-rt_entry_t* rt_add_or_update_entry(rt_table_t* table,
-																	 char*dest_ip,
-																	 char mask,
-																	 char* gw_ip,
-																	 char* oif);
+rt_entry_t* rt_add_or_update_entry(
+	rt_table_t* table,
+	char*dest_ip,
+	char mask,
+	char* gw_ip,
+	char* oif
+);
 
 bool rt_del_entry(rt_table_t *table, char *dest_ip, char mask);
 
 rt_entry_t* rt_lookup(rt_table_t *table, char *dest_ip, char mask);
 
 void rt_out(rt_table_t* table);
+
+void rt_entry_remove(rt_table_t* table, rt_entry_t* entry);
+
+void rt_register(
+	rt_table_t* table,
+	rt_entry_keys_t* key,
+	size_t key_size,
+	envoy_emitter cb,
+	uint32_t subscriber_id
+);
 
 #endif

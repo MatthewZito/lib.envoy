@@ -1,5 +1,7 @@
 #include "routing_table.h"
 
+#include "envoy.h"
+
 #include <stdlib.h>
 #include <string.h>
 
@@ -74,7 +76,7 @@ bool rt_del_entry(rt_table_t* table, char* dest_ip, char mask) {
 			dest_ip, sizeof(entry->keys.dest)) == 0 &&
 			entry->keys.mask == mask){
 
-			entry_remove(table, entry);
+			rt_entry_remove(table, entry);
 			free(entry);
 
 			return true;
@@ -125,4 +127,92 @@ void rt_out(rt_table_t* table) {
 		);
 
 	} ITER_RT_END(table, entry);
+}
+
+/**
+ * @brief Remove a given entry from the table
+ *
+ * @param table
+ * @param entry
+ */
+void rt_entry_remove(rt_table_t* table, rt_entry_t* entry) {
+	if (!entry->prev) {
+		if (entry->next) {
+			entry->next->prev = 0;
+			table->head = entry->next;
+			entry->next = 0;
+			return;
+		}
+
+		table->head = 0;
+			return;
+		}
+
+  if (!entry->next) {
+		entry->prev->next = 0;
+		entry->prev = 0;
+		return;
+	}
+
+	entry->prev->next = entry->next;
+	entry->next->prev = entry->prev;
+	entry->prev = 0;
+	entry->next = 0;
+}
+
+/**
+ * @brief Register a routing table entry subscription
+ *
+ * @param table
+ * @param key
+ * @param key_size
+ * @param cb
+ * @param subscriber_id
+ */
+void rt_register(
+	rt_table_t* table,
+	rt_entry_keys_t* key,
+	size_t key_size,
+	envoy_emitter cb,
+	uint32_t subscriber_id) {
+
+	bool entry_created;
+
+	rt_entry_t* entry;
+	envoy_node_t node;
+
+	entry_created = false;
+
+	entry = rt_lookup(table, key->dest, key->mask);
+
+	if (!entry) {
+		entry = rt_add_or_update_entry(
+			table,
+			key->dest,
+			key->mask,
+			0,
+			0
+		);
+
+		entry_created = true;
+	}
+
+	memset(&node, 0, sizeof(envoy_node_t));
+
+	if (key_size <= MAX_NOTIF_KEY_SIZE) return;
+
+	node.event_fn = cb;
+	node.subscriber_id = subscriber_id;
+	envoy_subscribe(entry->envoy, &node);
+
+	// subscriber subscribes to extant rt entry;
+	// call `ENVOY_ADD` opcode
+	if (!entry_created) {
+		cb(
+			entry,
+			sizeof(rt_entry_t),
+			ENVOY_ADD,
+			subscriber_id
+		);
+	}
 }

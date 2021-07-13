@@ -39,7 +39,7 @@ typedef struct notifier_chain_node {
 	envoy_emitter event_fn; /* Event function to invoke when subscription key type events are emitted */
 	glthread_t glthread; /* The GL Thread node whose offset stores this node */
 	uint32_t subscriber_id; /* Node unique id */
-} node_t;
+} envoy_node_t;
 
 envoy_t* envoy_init(char* envoy_name);
 
