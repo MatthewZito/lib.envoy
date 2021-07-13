@@ -18,15 +18,15 @@ A notification chain is a data structure that plays the role of a generic publis
 
 The notification chain is at its core a linked list data structure. Each chain represents a single, observable (it can be subscribed to) piece of data, denoted here by a 64 bit character array key.
 
-Each node in the linked list is a subscription entry. Whether the notification chain API itself or the caller creates new nodes is discerned by the programmer and not the model - that is, this detail is of negligible consequence provided the node is implemented as expected.
+Each node in the linked list represents a subscription, along with the required data for notifying the subscriber.
 
 When the notification chain's delegated data has changed, or an observable event has transpired, we iterate the linked list and check each subscription (node). If the subscriber has provided the correct subscription ID (key), we invoke the callback at the void function pointer that was provided to us.
 
-There's a reason we use the void pointer. A notification chain is often part of a multi-threaded system. To pass data across threads is of greater expense to the OS / kernel than dereferencing a function pointer. And so we elect a strategy called ['Transfer of Computation'](https://gist.github.com/MatthewZito/e187ce42eadaaf2a1eeabb0d36fe9604)
+Similarly, if no key was provided, we presume the subscriber is interested in all events and we notify them as well.
 
-If the subscriber has provided NO key at all, we assume the subscriber is interested in *all* data, and we invoke the provided function pointer.
+### Why not just pass the data?
 
-Finally, notification chains may manage other chains. We can recurse and have a data structure that is a network of threads, each managing a set of notification chains (which are in turn detached POSIX threads).
+There's a reason we use the void pointer in lieu of passing data around. A notification chain is often part of a multi-threaded system. To transfer data across threads is of greater expense to the OS / kernel than dereferencing a function pointer. And so we elect a strategy called 'Transfer of Computation'. Have a look at this gist to see a demo of this strategy [here](https://gist.github.com/MatthewZito/e187ce42eadaaf2a1eeabb0d36fe9604)
 
 ### Optimizing with GLUE lists
 
@@ -35,6 +35,30 @@ There's a fairly novel albeit obscure concept called a 'GLUE Linked List'. The i
 Instead, we use the memory format of the node structure itself to calculate an *offset* at which the data represented by that node resides. That is, the offset is said to be 'glued' to the node at no additional expense.
 
 A considerable benefit here is we no longer incur *any* cost of carrying around data, even a pointer. `envoy` implements notification chains using this variety of linked list; you can find the source code in both this library and `lib.cartilage`
+
+### Example: Routing Tables
+
+[Here's a simplified example](../envoy/examples/routing_table/) of what a real use case for notification chains might look like.
+
+Notice the publisher thread is never actually aware of subscribers - instead, the data source (in this case a routing table) implements an API that allows the transference of events between the two data structures.
+
+The data source also handles the initialization of subscription nodes before they are passed on to the envoy.
+
+In the example, we generate *N* subscriber threads which each subscribe to a determinate number of routing table entries of *X* ip address.
+
+We then spawn the publisher thread, which updates *N* random entries of the routing table.
+
+### Invoking the simulation
+
+Use the Makefile to compile, then execute the program to see the verbose output of the simulation.
+
+Notice we first spawn *N* subscriber threads; each subscriber chooses a random integer between 0 - 9 and begins subscribing to IP addresses ending with that integer.
+
+Each subscriber will be notified with the `ENVOY_CONFIRM_SUBSCRIBE` opcode immediately.
+
+Next, we spawn the publisher thread. This thread similarly begins choosing ip addresses at random and edits their routing table entries, causing subscribers to be notified of changes.
+
+In a real system these threads would most likely be detached (i.e. the main thread / process would be indefinite), but for our purposes we end the program by joining all threads and ensuring our main thread has awaited them.
 
 ## Dynamic Linking
 

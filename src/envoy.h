@@ -11,7 +11,8 @@
 typedef enum {
 	ENVOY_UNKNOWN,
 	ENVOY_SUB,
-	ENVOY_ADD,
+	ENVOY_CONFIRM_SUBSCRIBE,
+	ENVOY_UNSUBSCRIBE,
 	ENVOY_MOD,
 	ENVOY_DEL
 } envoy_event_t;
@@ -19,7 +20,7 @@ typedef enum {
 /**
  * @brief Subscriber callback type
  */
-typedef void (*envoy_emitter)(void *, size_t, envoy_event_t, uint32_t);
+typedef void* (*envoy_emitter)(void*, size_t, envoy_event_t, uint32_t);
 
 /**
  * @brief A notifier chain instance
@@ -42,5 +43,16 @@ typedef struct notifier_chain_node {
 } envoy_node_t;
 
 envoy_t* envoy_init(char* envoy_name);
+
+void envoy_subscribe(envoy_t* envoy, envoy_node_t* node);
+
+void envoy_invoke(
+	envoy_t* envoy,
+	void* arg, size_t arg_size,
+	char* key, size_t key_size,
+	envoy_event_t op_code
+);
+
+void envoy_purge(envoy_t* envoy);
 
 #endif /* ENVOY_H */

@@ -4,7 +4,7 @@
 #include <memory.h> /* for memcpy, strncpy */
 
 // TODO update to macro
-envoy_node_t* glue_to_chain(glthread_t* glthreadptr) {
+envoy_node_t* glued(glthread_t* glthreadptr) {
 	return (envoy_node_t*)((char*)(glthreadptr) - (char *)&(((envoy_node_t*)0)->glthread));
 }
 
@@ -67,7 +67,7 @@ void envoy_invoke(
 	// to check every node's key
 	ITERATE_GLTHREAD_BEGIN(&envoy->chain_head, curr) {
 		// grab each node
-		node = glue_to_chain(curr);
+		node = glued(curr);
 
 		// does the node represent a subscriber to a specific key?
 		if (key && key_size && node->key_set && (key_size == node->key_size)) {
@@ -79,6 +79,24 @@ void envoy_invoke(
 			// the node subscribes to all keys (no key specified)
 			node->event_fn(arg, arg_size, op_code, node->subscriber_id);
 		}
+
+	} ITERATE_GLTHREAD_END(&envoy->chain_head, curr);
+}
+
+/**
+ * @brief Purge, delete, and deallocate all nodes of the given envoy
+ *
+ * @param envoy
+ */
+void envoy_purge(envoy_t* envoy) {
+	glthread_t* curr;
+	envoy_node_t* node;
+
+	ITERATE_GLTHREAD_BEGIN(&envoy->chain_head, curr) {
+
+		node = glued(curr);
+		glthread_remove(&node->glthread);
+		free(node);
 
 	} ITERATE_GLTHREAD_END(&envoy->chain_head, curr);
 }
