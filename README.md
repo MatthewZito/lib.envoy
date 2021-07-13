@@ -2,7 +2,14 @@
 
 build evented, multicast notification chains
 
-## About Notification Chains
+## Table of Contents
+
+- [About Notification Chains](#about)
+- [Use Case Example](#example)
+- [Dynamic Linking](#linking)
+- [Documentation](#docs)
+
+## <a name="about"></a> About Notification Chains
 
 This library implements a generic notification chain API that can be utilized to construct multicast event systems.
 
@@ -36,9 +43,9 @@ Instead, we use the memory format of the node structure itself to calculate an *
 
 A considerable benefit here is we no longer incur *any* cost of carrying around data, even a pointer. `envoy` implements notification chains using this variety of linked list; you can find the source code in both this library and `lib.cartilage`
 
-### Example: Routing Tables
+## <a name="example"></a> Example: Routing Tables
 
-[Here's a simplified example](../envoy/examples/routing_table/) of what a real use case for notification chains might look like.
+[Here's a simplified example](./examples/routing_table) of what a real use case for notification chains might look like.
 
 Notice the publisher thread is never actually aware of subscribers - instead, the data source (in this case a routing table) implements an API that allows the transference of events between the two data structures.
 
@@ -60,7 +67,7 @@ Next, we spawn the publisher thread. This thread similarly begins choosing ip ad
 
 In a real system these threads would most likely be detached (i.e. the main thread / process would be indefinite), but for our purposes we end the program by joining all threads and ensuring our main thread has awaited them.
 
-## Dynamic Linking
+## <a name="linking"></a> Dynamic Linking
 
 Linking to `lib.envoy`:
 
@@ -86,4 +93,53 @@ make win
 # 3) link your project to lib.envoy
 gcc -o main.exe main.o -L /path/to/lib.envoy -llib_envoy.dll
 # you may need to add the lib location to your PATH
+```
+
+## <a name="docs"></a> API and Documentation
+
+### Op Codes
+
+- `ENVOY_UNKNOWN`,
+- `ENVOY_SUB`,
+- `ENVOY_CONFIRM_SUBSCRIBE`,
+- `ENVOY_UNSUBSCRIBE`,
+- `ENVOY_MOD`,
+- `ENVOY_DEL`
+
+### API Methods
+
+**Subscriber callback type**
+
+```c
+typedef void* (*envoy_emitter)(void*, size_t, envoy_event_t, uint32_t);
+```
+
+**Allocate and initialize a new Envoy with a given name**
+
+```c
+envoy_t* envoy_init(char* envoy_name);
+```
+
+**Register a new node as a subscriber to a given Envoy**
+
+```c
+void envoy_subscribe(envoy_t* envoy, envoy_node_t* node);
+```
+
+**invoke an envoy, initiating event emission upon all subscribers to `key`**
+
+```c
+void envoy_invoke(
+	envoy_t* envoy,
+	void* arg,
+	size_t arg_size,
+	char* key,
+	size_t key_size,
+	envoy_event_t op_code);
+```
+
+**Purge, delete, and deallocate all nodes of the given envoy**
+
+```c
+void envoy_purge(envoy_t* envoy);
 ```
