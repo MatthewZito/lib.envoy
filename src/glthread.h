@@ -2,6 +2,7 @@
 #define GLTHREAD_H
 
 /* Macros */
+
 #define IS_GLTHREAD_EMPTY(glthreadptr) ((glthreadptr)->next == 0 && (glthreadptr)->prev == 0)
 
 #define BASE(glthreadptr) ((glthreadptr)->next)
@@ -49,4 +50,4 @@ void glthread_priority_insert(
 
 glthread_t* glthread_dequeue_first(glthread_t* head);
 
-#endif
+#endif /* GLTHREAD_H */
