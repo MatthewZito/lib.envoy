@@ -1,13 +1,12 @@
 CC=gcc
-CFLAGS=-Wall -Wextra -pedantic -std=c17
-LDFLAGS=
 OBJFILES=$(wildcard ./*.c)
+INTERMEDIARY=main
 TARGET=demo
 
 all: $(TARGET)
 
 $(TARGET): $(OBJFILES)
-	$(CC) $(CFLAGS) -o $(TARGET) $(OBJFILES) $(LDFLAGS)
-	
+	$(CC) -I ../../src $(OBJFILES) -o $(INTERMEDIARY) -lpthread -L../../ -lenvoy
+
 clean:
 	rm $(TARGET)

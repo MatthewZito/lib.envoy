@@ -1,7 +1,11 @@
-#include "subscriber.h"
-#include "publisher.h"
 
+#include "publisher.h"
 #include "routing_table.h"
+#include "subscriber.h"
+
+#include <string.h>
+#include <stdio.h> /* for printf */
+#include <stdlib.h> /* for rand */
 
 /**
  * @brief Implements a subscriber thread callback;
@@ -10,21 +14,30 @@
  * @param arg
  * @return void*
  */
-static void* subscriber_thread_routine(void* arg) {
+void* subscriber_thread_routine(void* arg) {
 	rt_entry_keys_t keys;
 
-	memset(&keys, 9, sizeof(rt_entry_keys_t));
-	strncpy(keys.dest, "122.1.1.1", 16);
-	keys.mask = 32;
+	// generate subscriptions
+	int randint = rand() % 10;
+	for (int i = randint; i < ADDR_RANGE / 10; i++) {
+		char buffer[16];
+		snprintf(buffer, 16, "122.1.1.%d", i);
 
-	// for (int i = 0; ); add more subscriptions
-	rt_register(
-		publisher_table,
-		&keys,
-		sizeof(rt_entry_keys_t),
-		subscription_callback,
-		(uint32_t)arg // this will be the subscriber id
-	);
+		memset(&keys, 0, sizeof(rt_entry_keys_t));
+		strncpy(keys.dest, buffer, 16);
+
+		keys.mask = 32;
+
+		rt_register(
+			&publisher_table,
+			&keys,
+			sizeof(rt_entry_keys_t),
+			subscription_callback,
+			(uint32_t)arg // this will be the subscriber id
+		);
+
+		printf("subscriber thread subscribed to entry with address %s\n", buffer);
+	}
 
 	return NULL;
 }
@@ -44,10 +57,13 @@ void* subscription_callback(
 	envoy_event_t opcode,
 	uint32_t subscriber_id) {
 
-	printf("In function %s subscriber %u notified with opcode %s\n",
-		__FUNCTION__,
+	rt_entry_t* entry = (rt_entry_t*)arg;
+
+	printf("subscriber %u notified with opcode %d for addr %s\n",
 		subscriber_id,
-		opcode
+		opcode,
+		(char*)entry
 	);
 
+	return NULL;
 }

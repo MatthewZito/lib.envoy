@@ -12,12 +12,14 @@
 
 	|    Dest    | Mask |  Oif  |    gw    |
 	|------------|------|-------|----------|
-	| 1222.1.1.1 | 32   | Eth34 | 10.1.1.1 |
-	| 1222.1.1.2 | 32   | Eth34 | 20.1.1.1 |
-	| 1222.1.1.3 | 32   | Eth43 | 10.1.1.1 |
-	| 1222.1.1.4 | 32   | Eth21 | 20.1.2.1 |
+	| 122.1.1.1 | 32    | Eth34 | 10.1.1.1 |
+	| 122.1.1.2 | 32    | Eth34 | 20.1.1.1 |
+	| 122.1.1.3 | 32    | Eth43 | 10.1.1.1 |
+	| 122.1.1.4 | 32    | Eth21 | 20.1.2.1 |
 
 */
+
+#define ADDR_RANGE 100
 
 #define ITER_RT_BEGIN(tableptr, entryptr) {                                                                         \
 	rt_entry_t* next;                                                   \
@@ -52,7 +54,7 @@ void rt_init(rt_table_t* table);
 
 rt_entry_t* rt_add_or_update_entry(
 	rt_table_t* table,
-	char*dest_ip,
+	char* dest_ip,
 	char mask,
 	char* gw_ip,
 	char* oif
