@@ -43,6 +43,10 @@ Instead, we use the memory format of the node structure itself to calculate an *
 
 A considerable benefit here is we no longer incur *any* cost of carrying around data, even a pointer. `envoy` implements notification chains using this variety of linked list; you can find the source code in both this library and `lib.cartilage`
 
+Resources and further reading:
+
+- [Notification Chains in Linux](https://www.oreilly.com/library/view/understanding-linux-network/0596002556/ch04.html)
+
 ## <a name="example"></a> Example: Routing Tables
 
 [Here's a simplified example](./examples/routing_table) of what a real use case for notification chains might look like.
