@@ -1,7 +1,8 @@
-#include "envoy.h"
+#include "libenvoy.h"
 
 #include <stdlib.h> /* for calloc */
-#include <memory.h> /* for memcpy, strncpy */
+#include <memory.h> /* for memcpy */
+#include <bsd/bsd.h> /* for strlcpy */
 
 // TODO update to macro
 envoy_node_t* glued(glthread_t* glthreadptr) {
@@ -18,7 +19,9 @@ envoy_t* envoy_init(char* envoy_name) {
 	envoy_t* envoy;
 
 	if ((envoy = calloc(1, sizeof(envoy_t)))) {
-		strncpy(envoy->chain_name, envoy_name, sizeof(envoy_name));
+		if (strlcpy(envoy->chain_name, envoy_name, sizeof(envoy_name)) >= sizeof(envoy_name)) {
+			return NULL;
+		}
 	} // TODO panic here
 
 	glthread_init(&envoy->chain_head);

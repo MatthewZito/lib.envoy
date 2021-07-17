@@ -1,10 +1,11 @@
 #include "routing_table.h"
 
-#include "envoy.h"
+#include "libenvoy.h"
 
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <bsd/bsd.h> /* for strlcpy */
 
 /**
  * @brief Initialize a routing table
@@ -39,16 +40,23 @@ rt_entry_t* rt_add_or_update_entry(
 	if (!(entry = rt_lookup(table, dest_ip, mask))) {
 		entry = calloc(1, sizeof(rt_entry_t));
 
-		strncpy(entry->keys.dest, dest_ip, sizeof(entry->keys.dest));
+		if (strlcpy(entry->keys.dest, dest_ip, sizeof(entry->keys.dest)) >= sizeof(entry->keys.dest)) {
+			return NULL;
+		}
+
 		entry->keys.mask = mask;
 
 		entry->envoy = envoy_init("test");
 		entry_created = true;
 	}
 
-	if (gw_ip) strncpy(entry->gw_ip, gw_ip, sizeof(entry->gw_ip));
+	if (gw_ip && (strlcpy(entry->gw_ip, gw_ip, sizeof(entry->gw_ip)) >= sizeof(entry->gw_ip))) {
+		return NULL;
+	}
 
-	if (oif) strncpy(entry->oif, oif, sizeof(entry->oif));
+	if (oif && (strlcpy(entry->oif, oif, sizeof(entry->oif)) >= sizeof(entry->oif))) {
+		return NULL;
+	}
 
 	if (entry_created) {
 		head = table->head;

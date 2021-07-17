@@ -6,6 +6,7 @@
 #include <string.h>
 #include <stdio.h> /* for printf */
 #include <stdlib.h> /* for rand */
+#include <bsd/bsd.h> /* for strlcpy */
 
 /**
  * @brief Implements a subscriber thread callback;
@@ -24,7 +25,9 @@ void* subscriber_thread_routine(void* arg) {
 		snprintf(buffer, 16, "122.1.1.%d", i);
 
 		memset(&keys, 0, sizeof(rt_entry_keys_t));
-		strncpy(keys.dest, buffer, 16);
+		if (strlcpy(keys.dest, buffer, 16) >= 16) {
+			return NULL;
+		}
 
 		keys.mask = 32;
 
