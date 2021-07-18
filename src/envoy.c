@@ -1,3 +1,13 @@
+/**
+ * @file envoy.c
+ * @author Matthew Zito (goldmund@freenode)
+ * @brief Implements a generic notification chain data structure
+ * @version 0.1
+ * @date 2021-07-18
+ *
+ * @copyright Copyright (c) 2021 Matthew Zito (goldmund)
+ *
+ */
 #include "libenvoy.h"
 
 #include <stdlib.h> /* for calloc */
@@ -6,7 +16,7 @@
 
 // TODO update to macro
 envoy_node_t* glued(glthread_t* glthreadptr) {
-	return (envoy_node_t*)((char*)(glthreadptr) - (char *)&(((envoy_node_t*)0)->glthread));
+	return (envoy_node_t*)((char*)(glthreadptr) - (char*)&(((envoy_node_t*)0)->glthread));
 }
 
 /**
