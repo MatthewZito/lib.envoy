@@ -55,13 +55,15 @@ Notice the publisher thread is never actually aware of subscribers - instead, th
 
 The data source also handles the initialization of subscription nodes before they are passed on to the envoy.
 
-In the example, we generate *N* subscriber threads which each subscribe to a determinate number of routing table entries of *X* ip address.
+In the example, we generate *N* subscriber threads which each subscribe to a determinant number of routing table entries of *X* ip address.
 
 We then spawn the publisher thread, which updates *N* random entries of the routing table.
 
 ### Invoking the simulation
 
 Use the Makefile to compile, then execute the program to see the verbose output of the simulation.
+
+To run, invoke `make` in the root directory, then in examples/routing_table. Finally, you may need to copy the shared object file libenvoy.so into the examples/routing_table directory.
 
 Notice we first spawn *N* subscriber threads; each subscriber chooses a random integer between 0 - 9 and begins subscribing to IP addresses ending with that integer.
 
