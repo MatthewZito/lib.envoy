@@ -1,7 +1,7 @@
 #ifndef ENVOY_H
 #define ENVOY_H
 
-#include "glthread.h"
+#include "lib.cartilage/libcartilage.h"
 
 #include <stddef.h> /* for size_t */
 #include <stdint.h> /* for uint32_t */

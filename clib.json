@@ -1,0 +1,21 @@
+{
+  "name": "lib.envoy",
+  "version": "0.0.1",
+  "author": "Matthew Zito (goldmund)",
+  "repo": "MatthewZito/lib.envoy",
+  "license": "MIT",
+  "description": "Thread-safe notification chains for the C programming language",
+  "keywords": [
+    "notification chains",
+    "linked list",
+    "multi-threading",
+    "event loop"
+  ],
+  "src": [
+    "src/libenvoy.h",
+    "src/envoy.c"
+  ],
+  "dependencies": {
+    "MatthewZito/lib.cartilage": "*"
+  }
+}
