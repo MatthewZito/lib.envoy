@@ -15,13 +15,13 @@ build evented, multicast notification chains
 Via [clib](https://github.com/clibs/clib/):
 
 ```bash
-clib install MatthewZito/lib.cartilage
+clib install MatthewZito/lib.envoy
 ```
 
 From Source:
 ```bash
-git clone https://github.com/MatthewZito/lib.cartilage
-cd lib.cartilage && make
+git clone https://github.com/MatthewZito/lib.envoy
+cd lib.envoy && make
 ```
 
 ## <a name="linking"></a> Dynamic Linking
